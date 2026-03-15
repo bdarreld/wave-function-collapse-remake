@@ -7,6 +7,7 @@ class Cell{
         this.index = index;
         this.options = []; // tile options for this one cell
         this.collapsed = false;
+        this.checked = false; // for recursion
 
         // at initialization, nothing is placed yet, so options contain everything
         for(let i = 0; i < tiles.length; i++){
@@ -15,7 +16,10 @@ class Cell{
     }
 
     show(){
-        if(this.collapsed){
+        if(this.options.length === 0){
+            fill(0, 0, 255);
+            square(this.x, this.y, this.w);
+        }else if(this.collapsed){
             let tileIndex = this.options[0];
             let img = tiles[tileIndex].img; // tiles is a global variable
             // renderImage(img, this.x, this.y, this.w / 3); // if the cell is this.w width long, the pixels must be w / 3 (3 per cell)

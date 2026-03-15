@@ -31,7 +31,7 @@ function renderCell(img, x, y, w){
     let b = img.pixels[index + 2];
     let a = img.pixels[index + 3];
     fill(r, g, b);
-    stroke(50);
+    noStroke();
     square(x, y, w);
 }
 
@@ -80,6 +80,7 @@ function extractTiles(img){
 function resetGrid(){
     for(let i = 0; i < grid.length; i++){
         grid[i].collapsed = false;
+        grid[i].checked = false;
         grid[i].options = [];
         for(let j = 0; j < tiles.length; j++){
             grid[i].options.push(j);

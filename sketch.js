@@ -1,11 +1,11 @@
 let img;
 let tiles;
-let DIM = 20;
+let DIM = 40;
 let w;
 let grid = [];
 
 function preload(){
-    img = loadImage('images/City.png');
+    img = loadImage('images/flowers.png');
 }
 
 function setup(){
@@ -54,10 +54,10 @@ function draw(){
     // visualization purposes
     for(let i = 0; i < grid.length; i++){
         grid[i].show();
+        grid[i].checked = false;
     }
     wfc();
     // noLoop();
-
 }
 
 function wfc(){
@@ -100,13 +100,18 @@ function wfc(){
 
     // Propagate adjacent cells
     // if there are no allowed adjacency rules at the end, return false, reset the grid, and run WFC again
-    if(!reduceEntropy(grid, cell)){
+    if(!reduceEntropy(grid, cell, 0)){
         resetGrid();
         return;
     }
 }
 
-function reduceEntropy(grid, cell){
+// every single recursive call of this function, increment depth by 1 to propagate even deeper
+// however, limit recursive depth after some number of recursive calls
+function reduceEntropy(grid, cell, depth){
+    if(depth > 5 || cell.checked) return true;
+    cell.checked = true;
+
     let index  = cell.index;
 
     // converting one-dimensional index to column and row
@@ -128,6 +133,7 @@ function reduceEntropy(grid, cell){
         if(adjacentCol < 0 || adjacentCol >= DIM || adjacentRow < 0 || adjacentRow >= DIM) continue; // loop out if out of bounds
         
         let adjacentCell = grid[adjacentCol + adjacentRow * DIM];
+        if(!adjacentCell || adjacentCell.collapsed) continue;
         let validOptions = [];
         for(let option of cell.options){
             validOptions = validOptions.concat(tiles[option].adjacencies[dir]);
@@ -135,16 +141,16 @@ function reduceEntropy(grid, cell){
 
         // if you add braces to => {}, you need to add a return statement.
         adjacentCell.options = adjacentCell.options.filter(opt => validOptions.includes(opt));
+
+        // Early exit: if this adjacent cell is now empty, it's already a failure
+        if(adjacentCell.options.length === 0) return false;
+
+        // recursively reduce entropy for each adjacent cell -- more propagation
+        // if it returns false, bubble it up
+        if(!reduceEntropy(grid, adjacentCell, depth + 1)){
+            return false;
+        }
     }
 
-    // Out of options check -- if entropy reduces to 0, meaning we get stuck in propagating
-    for(let [rowOffset, colOffset, dir] of adjacentCells){
-        let adjacentCol = col + colOffset;
-        let adjacentRow = row + rowOffset;
-        if(adjacentCol < 0 || adjacentCol >= DIM || adjacentRow < 0 || adjacentRow >= DIM) continue; // loop out if out of bounds
-        
-        let adjacentCell = grid[adjacentCol + adjacentRow * DIM];
-        if(adjacentCell.options.length === 0) return false;
-    }
     return true;
 }
