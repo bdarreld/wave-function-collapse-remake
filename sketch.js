@@ -1,48 +1,52 @@
 let img;
 let tiles;
-let DIM = 40;
+let GRID_SIZE = 50;
 let w;
-let grid = [];
+let grid;
+const TILE_SIZE = 3;
+const MAX_DEPTH = 20;
 
 function preload(){
-    img = loadImage('images/flowers.png');
+    img = loadImage('images/city.png');
 }
 
 function setup(){
     createCanvas(400, 400);
     tiles = extractTiles(img);
-    w = width / DIM;
+    w = width / GRID_SIZE;
     // calculate adjacency rules of each tile
     for(let tile of tiles){
        tile.calculateAdjacencies(tiles);
     }
 
-    // populate grid with cells
-    for(let row = 0; row < DIM; row++){
-        for(let col = 0; col < DIM; col++){
-            let index = col + row * DIM;
+    initializeGrid();
+
+    // perform initial wave function collapse step
+    wfc();
+}
+
+function initializeGrid(){
+    grid = [];
+    // Initialize the grid with cells
+    for(let row = 0; row < GRID_SIZE; row++){
+        for(let col = 0; col < GRID_SIZE; col++){
+            let index = col + row * GRID_SIZE;
             grid.push(new Cell(tiles, col * w, row * w, w, index));
         }
     }
-    console.log(grid);
-    wfc();
 }
 
 function draw9by9(width){
     let x = 0;
     let y = 0;
     let gap = 5; // pixels between tiles
-    let tileSize = width * 3; // pixels have been scaled by w and are now w x w. there are three pixel blocks in each tile, so w x 3.
 
     for(let i = 0; i < tiles.length; i++){
         renderImage(tiles[i].img, x, y, width);
-        x += tileSize + gap; // every time, increment by tileSize and add a bit of a gap
-        // x += tileSize;
-        if(x > 8 * (tileSize + gap)){ // w counts as one tile. we need 9 before it wraps around to the next row. we have 3 "pixel blocks", so multiply width (which is the scaled version of the pixel) by 3.
-        // if(x > 8 * tileSize){
+        x += w * TILE_SIZE + gap; // every time, increment by tileSize and add a bit of a gap
+        if(x > 8 * (w * TILE_SIZE + gap)){ // w counts as one tile. we need 9 before it wraps around to the next row. we have 3 "pixel blocks", so multiply width (which is the scaled version of the pixel) by 3.
             x = 0;
-            y += tileSize + gap;
-            // y += tileSize;
+            y += w * TILE_SIZE + gap;
         }
     }
 }
@@ -56,67 +60,76 @@ function draw(){
         grid[i].show();
         grid[i].checked = false;
     }
+
     wfc();
     // noLoop();
 }
 
+// WAVE FUNCTION COLLAPSE
 function wfc(){
-    // WAVE FUNCTION COLLAPSE
-    
-    // Make a copy of the grid
-    let gridCopy = grid.slice();
-
-    // Remove any collapsed cells
-    gridCopy = gridCopy.filter((a) => !a.collapsed); // a is an element in gridCopy
-
-    // The algorithm has completed if everything is collapsed
-    if(gridCopy.length == 0){
-        return;
+    // Calculate entropy for each cell
+    for(let cell of grid){
+        cell.calculateEntropy();
     }
 
-    // Sort by entropy to pick a cell with least entropy
-    gridCopy.sort((a, b) => {
-        return a.options.length - b.options.length;
-    });
+    // Find cells with the lowest entropy
+    // This refactored method avoids sorting
+    let minEntropy = Infinity;
+    let lowestEntropyCells = [];
 
-    // Keep only the lowest entropy cells
-    let len = gridCopy[0].options.length;
-    let stopIndex = 0;
-    for(let i = 1; i < gridCopy.length; i++){
-        if(gridCopy[i].options.length > len){ // gridCopy is already sorted, so we find the next cell with higher entropy
-            stopIndex = i;
-            break;
+    for(let cell of grid){
+        if(!cell.collapsed){
+            // If there is a cell with smaller entropy than the current counter, replace
+            // lowestEntropyCells with a new array containing just that cell
+            if(cell.entropy < minEntropy){
+                minEntropy = cell.entropy;
+                lowestEntropyCells = [cell];
+            }else if(cell.entropy === minEntropy){
+                lowestEntropyCells.push(cell);
+            }
         }
     }
-    if(stopIndex > 0){
-        gridCopy.splice(stopIndex); // removes all elements from stopIndex onwards
+
+    // We're done if all cells are collapsed
+    if(lowestEntropyCells.length === 0){
+        return;
     }
 
     // Collapse a cell
-    const cell = random(gridCopy); // random() is a p5.js-specific function
+    const cell = random(lowestEntropyCells); // random() is a p5.js-specific function
     cell.collapsed = true;
     const pick = random(cell.options); // pick a random tile from the cell's options
     cell.options = [pick]; // assign an array that only contains pick
+    if(pick === undefined){
+        console.log("ran out of options");
+        initializeGrid();
+        return;
+    }
 
     // Propagate adjacent cells
     // if there are no allowed adjacency rules at the end, return false, reset the grid, and run WFC again
-    if(!reduceEntropy(grid, cell, 0)){
-        resetGrid();
-        return;
+    reduceEntropy(grid, cell, 0);
+
+    // optimization line
+    for(let cell of grid){
+        if(cell.options.length == 1){
+            cell.collapsed = true;
+            reduceEntropy(grid, cell, 0);
+        }
     }
 }
 
 // every single recursive call of this function, increment depth by 1 to propagate even deeper
 // however, limit recursive depth after some number of recursive calls
 function reduceEntropy(grid, cell, depth){
-    if(depth > 5 || cell.checked) return true;
+    if(depth > MAX_DEPTH || cell.checked) return;
     cell.checked = true;
 
     let index  = cell.index;
 
     // converting one-dimensional index to column and row
-    let col = floor(index % DIM);
-    let row = floor(index / DIM);
+    let col = floor(index % GRID_SIZE);
+    let row = floor(index / GRID_SIZE);
 
     // [rowOffset, colOffset, direction] -- refactor code to look more clean
     // this is for ALL directions
@@ -130,9 +143,9 @@ function reduceEntropy(grid, cell, depth){
     for(let [rowOffset, colOffset, dir] of adjacentCells){
         let adjacentCol = col + colOffset;
         let adjacentRow = row + rowOffset;
-        if(adjacentCol < 0 || adjacentCol >= DIM || adjacentRow < 0 || adjacentRow >= DIM) continue; // loop out if out of bounds
+        if(adjacentCol < 0 || adjacentCol >= GRID_SIZE || adjacentRow < 0 || adjacentRow >= GRID_SIZE) continue; // loop out if out of bounds
         
-        let adjacentCell = grid[adjacentCol + adjacentRow * DIM];
+        let adjacentCell = grid[adjacentCol + adjacentRow * GRID_SIZE];
         if(!adjacentCell || adjacentCell.collapsed) continue;
         let validOptions = [];
         for(let option of cell.options){
@@ -142,15 +155,7 @@ function reduceEntropy(grid, cell, depth){
         // if you add braces to => {}, you need to add a return statement.
         adjacentCell.options = adjacentCell.options.filter(opt => validOptions.includes(opt));
 
-        // Early exit: if this adjacent cell is now empty, it's already a failure
-        if(adjacentCell.options.length === 0) return false;
-
         // recursively reduce entropy for each adjacent cell -- more propagation
-        // if it returns false, bubble it up
-        if(!reduceEntropy(grid, adjacentCell, depth + 1)){
-            return false;
-        }
+        reduceEntropy(grid, adjacentCell, depth + 1);
     }
-
-    return true;
 }

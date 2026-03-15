@@ -1,5 +1,4 @@
 function renderImage(img, x, y, w){
-    img.loadPixels();
     for(let row = 0; row < img.height; row++){
         for(let col = 0; col < img.width; col++){
             let index = (col + row * img.width) * 4;
@@ -21,8 +20,7 @@ function renderImage(img, x, y, w){
 
 // render ONLY the center pixel of the tile image
 function renderCell(img, x, y, w){
-    img.loadPixels();
-    let row = floor(img.height / 2);
+    let row = floor(img.width / 2);
     let col = floor(img.width / 2);
 
     let index = (col + row * img.width) * 4;
@@ -36,8 +34,7 @@ function renderCell(img, x, y, w){
 }
 
 // sx and sy is offset of x and y
-function copyTiles(source, sx, sy, w, dest){
-    source.loadPixels();
+function copyTile(source, sx, sy, w, dest){
     dest.loadPixels();
     
     for(let row = 0; row < w; row++){
@@ -67,9 +64,9 @@ function extractTiles(img){
     
     for(let row = 0; row < img.height; row++){
         for(let col = 0; col < img.width; col++){
-            let tileImage = createImage(3, 3);
+            let tileImage = createImage(TILE_SIZE, TILE_SIZE);
             // tileImage.copy(img, col, row, 3, 3, 0, 0, 3, 3); 
-            copyTiles(img, col, row, 3, tileImage);
+            copyTile(img, col, row, TILE_SIZE, tileImage);
             tiles.push(new Tile(tileImage, tiles.length)); // tiles.length updates accordingly with more tiles
         }
     }

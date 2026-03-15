@@ -9,7 +9,12 @@ class Tile{
         // each tile will store its own image as well as a list of its adjacency rules (R, L, U, D)
         // each adjacent tile will be stored as a tile INDEX and not the image itself
         this.img = img;
+        this.img.loadPixels();
         this.index = i;
+
+        // Frequency hint for weighted probabilities in entropy calculation
+        this.frequency = 1;
+
         this.adjacencies = [];
         this.adjacencies[R] = [];
         this.adjacencies[L] = [];
