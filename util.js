@@ -67,20 +67,28 @@ function extractTiles(img){
             let tileImage = createImage(TILE_SIZE, TILE_SIZE);
             // tileImage.copy(img, col, row, 3, 3, 0, 0, 3, 3); 
             copyTile(img, col, row, TILE_SIZE, tileImage);
-            tiles.push(new Tile(tileImage, tiles.length)); // tiles.length updates accordingly with more tiles
+
+            // check if this tile already exists
+            let existing = tiles.find(t => tilesMatch(t.img, tileImage));
+            if(existing){
+                existing.frequency++;
+            }else{
+                tiles.push(new Tile(tileImage, tiles.length)); // tiles.length updates accordingly with more tiles
+            }
         }
     }
 
     return tiles;
 }
 
-function resetGrid(){
-    for(let i = 0; i < grid.length; i++){
-        grid[i].collapsed = false;
-        grid[i].checked = false;
-        grid[i].options = [];
-        for(let j = 0; j < tiles.length; j++){
-            grid[i].options.push(j);
-        }
+function tilesMatch(a, b){
+    for(let i = 0; i < TILE_SIZE * TILE_SIZE; i++){
+        if(differentColor(a, i * 4, b, i * 4)) return false;
     }
+    return true;
+}
+
+function arrayEquals(a, b){
+    return a.length === b.length &&
+    a.every((element, index) => element === b[index]);
 }

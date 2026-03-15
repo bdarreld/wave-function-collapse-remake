@@ -9,7 +9,6 @@ class Cell{
         this.index = index;
         this.options = []; // tile options for this one cell
         this.collapsed = false;
-        this.checked = false; // for recursion
 
         // at initialization, nothing is placed yet, so options contain everything
         for(let i = 0; i < tiles.length; i++){
@@ -29,24 +28,16 @@ class Cell{
 
         // Compute total frequency of all of the options
         let totalFrequency = 0;
-        for(let option of this.options){
-            totalFrequency += tiles[option].frequency;
+        for(let tileIndex of this.options){
+            totalFrequency += tiles[tileIndex].frequency;
         }
 
         // Shannon entropy: negative sum of all P_i * log_2(P_i) i = 1 to n 
-        // Let P_i = w_i / (w_1 + w_2 + ... + wn)
-        // Then the entropy formula can be simplified to log(W) - (w_1*log(w_1) + ... w_n*log(w_n)) / W
-        // However, if this.options.length is already 0, the calculation for entropy will give an undefined number and corrupt
-        // the program. Hence, we must put a guard rail on this.
         this.entropy = 0;
-        if(this.options.length !== 0){
-            for(let option of this.options){
-                let frequency = tiles[option].frequency; // w_i
-                // this.entropy += frequency * log(frequency);
-                let probability = frequency / totalFrequency;
-                this.entropy -= probability * (log(probability) / Math.log(2));
-            }
-            // this.entropy = log(totalFrequency) - this.entropy / totalFrequency;
+        for(let tileIndex of this.options){
+            let frequency = tiles[tileIndex].frequency;
+            let probability = frequency / totalFrequency;
+            this.entropy -= probability * (log(probability) / Math.log(2));
         }
     }
 
@@ -84,6 +75,12 @@ class Cell{
             fill(sumR, sumG, sumB);
             noStroke();
             square(this.x, this.y, this.w);
-        }
+
+            fill(0)
+            noStroke();
+            textSize(this.w/2);
+            textAlign(CENTER, CENTER);
+            text(this.options.length, this.x + this.w / 2, this.y + this.w / 2)
+        } 
     }
 }
