@@ -1,6 +1,6 @@
 let img;
 let tiles;
-let GRID_SIZE = 100;
+let GRID_SIZE = 50;
 let w;
 let grid;
 let changeLog;
@@ -8,14 +8,19 @@ let backtrackCount = 0;
 
 const QUEUE_CAP = GRID_SIZE * GRID_SIZE;
 const TILE_SIZE = 3;
-const MAX_BACKTRACK = 30;
+const MAX_BACKTRACK = 70;
+
+// Turn on or off rotations and reflections
+const ROTATIONS = true;
+const REFLECTIONS = true;
 
 function preload(){
-    img = loadImage('images/city.png');
+    img = loadImage("/images/wrinkles.png");
 }
 
 function setup(){
     createCanvas(400, 400);
+
     tiles = extractTiles(img);
     w = width / GRID_SIZE;
     // calculate adjacency rules of each tile

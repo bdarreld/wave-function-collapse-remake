@@ -76,11 +76,12 @@ class Cell{
             noStroke();
             square(this.x, this.y, this.w);
 
-            fill(0)
-            noStroke();
-            textSize(this.w/2);
-            textAlign(CENTER, CENTER);
-            text(this.options.length, this.x + this.w / 2, this.y + this.w / 2)
+            // Information of number of options in each cell
+            // fill(0)
+            // noStroke();
+            // textSize(this.w/2);
+            // textAlign(CENTER, CENTER);
+            // text(this.options.length, this.x + this.w / 2, this.y + this.w / 2)
         } 
     }
 }
