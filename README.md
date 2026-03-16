@@ -1,5 +1,5 @@
 # Wave-Function-Collapse
-Wave Function Collapse is a family of constraint-solving algorithms commonly used in procedural generation. It generates a set combination of patterns from local patterns from a given source image. This repository implements the **overlapping model** which computes adjacency rules based on the source image itself in Javascript (p5.js).
+Wave Function Collapse is a family of constraint-solving algorithms commonly used in procedural generation. It generates a set combination of patterns from local patterns from a given source image. This repository optimizes the implementation of the **overlapping model** based on [The Coding Train's implementation](https://www.youtube.com/watch?v=5iSAvzU2WYY) (p5.js).
 
 
 ## Overview
@@ -12,13 +12,19 @@ The collapse of one cell will affect the entropy of its adjacent cells (since th
 
 ## Algorithm
 
-#### Local Patterns
+### Local Patterns
 Extracting local patterns from a source image involves a "sliding tile" approach where you read every possible $3\times3$ pattern. These local patterns can also undergo rotation and reflection to produce even more patterns to be used in the procedural generation. Each local pattern will have its own frequency count, and duplicate patterns will be stored as some frequency for that unique pattern. These frequency counts will be used to calculate the entropy for each pattern and when collapsing least entropy patterns.
 
-#### Adjacency Rules
+### Adjacency Rules
 From all the extracted local patterns, it tries to find overlapping pixels with every other extracted local pattern. The direction of the overlap (which tile is considered to be the source and which is the adjacent cell) will determine the direction of the adjacency rule, e.g., tile B must appear to the right of tile A.
 
-#### Entropy Calculation
+### Entropy Calculation
 
 
-#### Propagation
+### Propagation
+
+## External Links and Resources
+- [Paper: WFC is Constraint Solving in the Wild](https://escholarship.org/content/qt1f29235t/qt1f29235t.pdf)
+- [The Coding Train's Implementation of WFC](https://www.youtube.com/watch?v=5iSAvzU2WYY)
+- [Gridbugs Implementation of WFC](https://www.gridbugs.org/wave-function-collapse/)
+- [Redditor's Tips when Implementing WFC](https://www.fxhash.xyz/article/lessons-learned-from-implementing-%22wave-function-collapse%22)
