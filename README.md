@@ -1,10 +1,8 @@
 # Wave-Function-Collapse
 Wave Function Collapse is a family of constraint-solving algorithms commonly used in procedural generation. It generates a set combination of patterns from local patterns from a given source image. This repository implements the **overlapping model** which computes adjacency rules based on the source image itself in Javascript (p5.js).
 
-***
 
 ## Overview
-***
 Think of a grid of cells where each cell contains a number of possible tiles it can take on. At a high level, wave function collapse mimics the wave function in quantum mechanics, where each cell in a grid is in a superposition of multiple possibilities.
 
 You first would extract all possible local patterns ($3 \times 3$ tiles) from the source image and compute their adjacency rules using a model (overlapping or tiled). Each cell of the grid is in a superposition, and thus we will calculate the entropy of each cell to choose a cell to collapse. Intuitively, lower entropy on a cell means that information on that cell is more predictable than on other cells, so we will collapse a cell with the least entropy.
@@ -13,7 +11,6 @@ The collapse of one cell will affect the entropy of its adjacent cells (since th
 
 
 ## Algorithm
-***
 
 #### Local Patterns
 Extracting local patterns from a source image involves a "sliding tile" approach where you read every possible $3\times3$ pattern. These local patterns can also undergo rotation and reflection to produce even more patterns to be used in the procedural generation. Each local pattern will have its own frequency count, and duplicate patterns will be stored as some frequency for that unique pattern. These frequency counts will be used to calculate the entropy for each pattern and when collapsing least entropy patterns.
