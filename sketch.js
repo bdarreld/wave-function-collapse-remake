@@ -1,6 +1,6 @@
 let img;
 let tiles;
-let GRID_SIZE = 50;
+let GRID_SIZE = 100;
 let w;
 let grid;
 let changeLog;
@@ -15,7 +15,7 @@ const ROTATIONS = true;
 const REFLECTIONS = true;
 
 function preload(){
-    img = loadImage("/images/wrinkles.png");
+    img = loadImage("/images/flowers.png");
 }
 
 function setup(){

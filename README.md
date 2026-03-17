@@ -19,9 +19,12 @@ Extracting local patterns from a source image involves a "sliding tile" approach
 From all the extracted local patterns, it tries to find overlapping pixels with every other extracted local pattern. The direction of the overlap (which tile is considered to be the source and which is the adjacent cell) will determine the direction of the adjacency rule, e.g., tile B must appear to the right of tile A.
 
 ### Entropy Calculation
+In information entropy, given a random variable $X$ which can take on any values  $x \in \mathcal{X}$ with a given probability $p(x)$, the entropy is calculated as
+$$-\sum_{x\in\mathcal{X}}{p(x)\log p(x)}$$
+In the context of WFC, the random variable $X$ is the event a particular local pattern collapses in a cell. In other words, every value $x \in \mathcal{X}$ represents a pattern and $p(x)$ is the probability that a cell collapses to that pattern. To find the weights $p(x)$, we simply take the frequency count of a pattern and divide it by the total frequency of all patterns in a cell. Hence, every cell will have an entropy that determines the likelihood of a cell to be collapsed.
 
-
-### Propagation
+### Collapsing and Propagation
+In the first iteration, we would (uniformly) choose a random cell from the set of cells that have the least entropy to collapse. Then, using the frequency counts of each pattern in a cell, randomly, with weights, pick a pattern from the set of patterns. Once the first cell is collapsed, this will reduce the entropy of the cells adjacent to it. The updated entropy of each adjacent cell will update the entropy of its adjacent cells. This repository implements breadth-first search and backtracking for propagation.
 
 ## External Links and Resources
 - [Paper: WFC is Constraint Solving in the Wild](https://escholarship.org/content/qt1f29235t/qt1f29235t.pdf)
